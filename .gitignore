@@ -1,0 +1,18 @@
+.lake/
+build/
+*.olean
+*.ilean
+*.trace
+.DS_Store
+lake-packages/
+
+# Editor / agent metadata
+.claude/
+.vscode/
+.idea/
+
+# Migration handoff / review notes — internal scratch documents, not
+# part of the public deliverable. Tracked locally but excluded from
+# the repo.
+HANDOFF.md
+MIGRATION_REVIEW.md
