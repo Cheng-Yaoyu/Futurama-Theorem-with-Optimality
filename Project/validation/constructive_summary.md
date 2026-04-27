@@ -42,8 +42,13 @@ The Lean development covers:
 
 The validation is layered:
 
-* **Kernel correctness** — `lake build Project.TestProject` succeeds
-  with `exit 0`. Zero `sorry`, zero `admit`, zero user-defined axiom.
+* **Kernel correctness** — `lake build Project.TestProject` and
+  `lake build Project.validation.Constructive` both succeed with
+  `exit 0`. Zero `sorry`, zero `admit`, zero user-defined axiom
+  anywhere in the default build path. The randomised companion file
+  `Validation11_PlausibleStress.lean` is **opt-in** (not imported by
+  the constructive aggregate), so its Plausible-injected `sorry`
+  never enters any default build target.
 * **Definition correctness** — every constructive definition (`Body`,
   `Cycle`, `runScript`, `cyclePerm`, `cycleProduct`, `undoScript`,
   `liftPerm`, `factorCycles`, the parameterised family) has a
@@ -61,6 +66,20 @@ The validation is layered:
   enumeration of all 24 non-trivial `Perm (Fin 4)` cycle structures ×
   all 44 cut schedules, with an executable second semantics
   (`runState`) agreeing with `runScript` at every prefix.
+* **Large-cycle deterministic stress (`Validation10_LargeStress`)** —
+  single-cycle stress at `k = 5, 10, 20` and three disjoint 4-cycles
+  on `Fin 12`. Discharged by the closed-form length theorem +
+  `decide` and direct application of `optimalScript_correct`; no
+  `sorry` introduced. Pushes coverage beyond the exhaustive `Fin 4`
+  ground.
+
+An optional randomised companion
+(`Validation11_PlausibleStress.lean`) re-verifies V10's length-formula
+examples through Mathlib's `plausible` tactic. Plausible closes a
+passing randomised goal with `sorry`, so V11 is **deliberately
+excluded** from the constructive aggregate; build it directly via
+`lake build Project.validation.Constructive.Validation11_PlausibleStress`
+when randomised coverage is desired.
 
 All validation is reproducible via:
 
@@ -90,6 +109,14 @@ does not propagate to any kernel theorem.
 ## Bottom line
 
 The constructive Futurama theorem is fully formalised and validated
-through five layers (kernel correctness, definition correctness,
-statement correctness, executable sanity, and exhaustive `Fin 4`
-cross-semantics). No remaining open issue.
+through six layers (kernel correctness, definition correctness,
+statement correctness, executable sanity, exhaustive `Fin 4`
+cross-semantics, and large-cycle deterministic stress beyond the
+exhaustive ground). An optional seventh randomised layer
+(`Validation11_PlausibleStress.lean`) is available on direct request.
+The literate end-to-end demonstration on an episode-inspired S6E10
+slice — a 4-cycle plus a 3-cycle that exhibits the same
+`n + r + 2 = 11` optimum and the `r = 2` Keeler-vs-optimal
+coincidence — lives in
+[`../PrisonerOfBenda.lean`](../PrisonerOfBenda.lean). No remaining
+open issue.

@@ -1,4 +1,5 @@
 import Project.TestProject
+import Project.PrisonerOfBenda
 import Project.validation
 
 /-!
@@ -13,9 +14,14 @@ pulls in the entire formalisation:
   `n + r + 2` upper-bound construction together with the universal
   lower bound (also via `Project.TestProject`);
 * the Lemma 1 family and the Keeler-gap remarks;
+* a literate reconstruction of the actual S6E10 episode chaos in
+  `Project.PrisonerOfBenda` — the 4-cycle (Fry-Bender-Hermes-Zoidberg)
+  plus the 3-cycle (Leela-Amy-Professor) restored by `optimalScript`
+  in `n + r + 2 = 11` swaps;
 * the validation suite — boolean validators, exhaustive small-case
-  cross-semantics checks, axiom-baseline harnesses, and the optional
-  brute-force corroboration on `Fin 3` / `Fin 4` (via
+  cross-semantics checks, axiom-baseline harnesses, the optional
+  brute-force corroboration on `Fin 3` / `Fin 4`, and the
+  large-cycle stress + Plausible randomized layer (via
   `Project.validation`).
 
 `lake build Project` (the default target) builds everything. For

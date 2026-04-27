@@ -6,8 +6,9 @@ Lean 4 source tree for the Futurama Theorem formalisation.
 
 | File | Role |
 |------|------|
-| [`TestProject.lean`](TestProject.lean) | Top-level façade. Re-exports `Project.Futurama` + `Project.Futurama.Optimality`; hosts a small `Crew` example demonstrating `cyclePerm` / `repairPerm`; emits `#check` diagnostics for every public endpoint. |
+| [`TestProject.lean`](TestProject.lean) | Top-level façade. Re-exports `Project.Futurama` + `Project.Futurama.Optimality`; emits `#check` diagnostics for every public endpoint. |
 | [`Futurama.lean`](Futurama.lean) | Aggregator. `import Project.Futurama` pulls in the constructive theorem layer, the shared `RepairSpec` interface, the validation utilities, and the optimality subtree. |
+| [`PrisonerOfBenda.lean`](PrisonerOfBenda.lean) | Literate demonstration on an episode-inspired S6E10 slice: a 4-cycle (Fry → Bender → Hermes → Zoidberg) plus a 3-cycle (Leela → Amy → Professor) restored by `optimalScript` in `n + r + 2 = 7 + 2 + 2 = 11` swaps. Includes the `everyone_restored_optimal` and `everyone_restored_keeler` end-of-demo theorems. The actual episode features additional characters (Wash Bucket, Nikolai, etc.); the slice here is a faithful but pedagogically focused abstraction (see the file docstring for the full discussion). |
 
 ## Constructive layer — `Futurama/`
 
@@ -42,6 +43,9 @@ See [`validation/README.md`](validation/README.md).
 ```bash
 # Top-level (constructive + optimality)
 lake build Project.TestProject
+
+# Episode demo (literate reconstruction of S6E10 chaos)
+lake build Project.PrisonerOfBenda
 
 # Constructive validation aggregate
 lake build Project.validation.Constructive

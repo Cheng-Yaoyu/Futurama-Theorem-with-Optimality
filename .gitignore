@@ -16,3 +16,35 @@ lake-packages/
 # the repo.
 HANDOFF.md
 MIGRATION_REVIEW.md
+Guidelines_for_the_Report.md
+
+# LaTeX report source + auxiliary build outputs (the report PDF is
+# submitted separately, not via the repo).
+report.tex
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+
+# More LaTeX aux files
+*.bcf
+*.run.xml
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.xdv
+*.dvi
+*.ps
+
+# macOS metadata
+._*
+.AppleDouble
+.LSOverride
+Icon?

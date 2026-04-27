@@ -69,7 +69,10 @@ toolchain is `leanprover/lean4:v4.23.0` (see `lean-toolchain`).
 ## Soundness
 
 * **0** `sorry` / **0** `admit` / **0** user-defined `axiom` / **0**
-  `opaque` / **0** `constant`.
+  `opaque` / **0** `constant` in the default build path
+  (`lake build Project`, `lake build Project.validation`,
+  `lake build Project.validation.Constructive`,
+  `lake build Project.validation.Optimality`).
 * All public mathematical endpoints depend only on the standard Lean
   / Mathlib axioms `{propext, Classical.choice, Quot.sound}` (with
   one outlier: `undoScript_length_single_cycle` depends on only
@@ -79,21 +82,32 @@ toolchain is `leanprover/lean4:v4.23.0` (see `lean-toolchain`).
   (`Validation5.exists_perm4_cross_checked` and
   `Validation7BruteForceOptimality.bruteForceOptimality_Fin{3,4}`)
   and are isolated to those validation files.
+* The Plausible-driven randomised stress in
+  `Validation11_PlausibleStress.lean` is **opt-in** (not imported by
+  any aggregate). The `plausible` tactic in Mathlib v4.23.0 closes a
+  passing randomised goal with `sorry`, so V11 is built only via
+  `lake build Project.validation.Constructive.Validation11_PlausibleStress`;
+  it is documented and reachable but does not enter any default
+  build target, keeping the rest of the codebase `sorry`-clean.
 
 ## Reading order
 
 1. [Project/README.md](Project/README.md) — code map.
-2. [Project/validation/optimality_summary.md](Project/validation/optimality_summary.md)
+2. [Project/PrisonerOfBenda.lean](Project/PrisonerOfBenda.lean) —
+   one-page literate demonstration on an episode-inspired S6E10
+   slice: 9 characters, 4-cycle + 3-cycle, restored by
+   `optimalScript` in 11 swaps.
+3. [Project/validation/optimality_summary.md](Project/validation/optimality_summary.md)
    — what the optimality side validates, in one page.
-3. [Project/validation/paper_correspondence.md](Project/validation/paper_correspondence.md)
+4. [Project/validation/paper_correspondence.md](Project/validation/paper_correspondence.md)
    — paper-to-Lean theorem-by-theorem mapping.
-4. [Project/Futurama/Optimality/UpperBound.lean](Project/Futurama/Optimality/UpperBound.lean)
+5. [Project/Futurama/Optimality/UpperBound.lean](Project/Futurama/Optimality/UpperBound.lean)
    — paper Theorem 1 construction λ + the central packaging
    (`futuramaTheorem1OfPerm` / `optimalRepairSeqOfPerm` /
    `futuramaTheorem1Full`).
-5. [Project/Futurama/Optimality/LowerBound/Layer2.lean](Project/Futurama/Optimality/LowerBound/Layer2.lean)
+6. [Project/Futurama/Optimality/LowerBound/Layer2.lean](Project/Futurama/Optimality/LowerBound/Layer2.lean)
    — the lower bound `t ≥ n + r + 2` and `futurama_optimal`.
-6. [Project/Futurama/Optimality/Lemma1.lean](Project/Futurama/Optimality/Lemma1.lean)
+7. [Project/Futurama/Optimality/Lemma1.lean](Project/Futurama/Optimality/Lemma1.lean)
    — Lemma 1(a)/(b)/(c).
 
 ## Out of scope

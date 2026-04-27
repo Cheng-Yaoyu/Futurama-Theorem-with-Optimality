@@ -53,14 +53,18 @@ lake build Project.validation.Optimality.BruteForceAxioms
 
 All aggregate commands return `exit 0`.
 
-## Validation strategy (six layers)
+## Validation strategy (eight layers)
 
 The validation is layered to give independent evidence at multiple
 levels of abstraction:
 
-1. **Kernel correctness** — every Lean source file builds with
-   `exit 0`. No `sorry`, no `admit`, no user-defined axiom anywhere
-   in `Project/`.
+1. **Kernel correctness** — every Lean source file in the default
+   build path builds with `exit 0`. No `sorry`, no `admit`, no
+   user-defined axiom anywhere reachable from `lake build Project`.
+   The randomised optional file `Validation11_PlausibleStress.lean`
+   is **not** part of the default build (Plausible's documented
+   `sorry`-discharge convention is the reason); it lives outside
+   every aggregate and is built only on direct request.
 
 2. **Definition correctness** — every load-bearing definition has a
    documented mathematical role (see module docstrings in each
@@ -103,6 +107,21 @@ A seventh layer of **negative controls / anti-tests**
 the boolean validators from `Validation6_Optimality.lean` deliberately
 bad inputs and confirming each returns `false`.
 
+An eighth layer of **deterministic large-cycle stress**
+(`Constructive/Validation10_LargeStress.lean`) instantiates the kernel
+endpoints on inputs beyond the exhaustive `Fin 4` reach: single cycles
+at `k = 5, 10, 20` and three disjoint 4-cycles on `Fin 12`. Discharged
+by the closed-form length theorem and direct application of the
+kernel correctness theorem; no `sorry` introduced.
+
+An optional randomised companion `Validation11_PlausibleStress.lean`
+re-verifies V10's length-formula examples through Mathlib's
+`plausible` tactic. Plausible closes a passing randomised goal with
+`sorry`, so V11 is **not** imported by the constructive aggregate;
+build it directly via
+`lake build Project.validation.Constructive.Validation11_PlausibleStress`
+when randomised coverage is desired.
+
 ## Axiom baselines
 
 The axiom-baseline harnesses produce `#print axioms` output for the
@@ -133,6 +152,8 @@ Mathlib axioms:
 | `Constructive/Validation3.lean` | Defensive checks, orientation checks, negative controls, deep `#print axioms` audits. |
 | `Constructive/Validation4.lean` | Direct lower-level spec derivation, source traceability (`wikiSingleCycleBlock_eq_repairScriptAt`), and the 24-element `Fin 4` witness corpus. |
 | `Constructive/Validation5.lean` | Exhaustive cross-semantics over the full `Fin 4` witness × cut surface. |
+| `Constructive/Validation10_LargeStress.lean` | Deterministic single-cycle stress at `k = 5, 10, 20` and multi-cycle medium-size stress (three disjoint 4-cycles on `Fin 12`). Complementary to V5/V6 (which max out at `Fin 4` exhaustively) and V7 (which brute-forces at `Fin 3, 4`). Discharged by the closed-form length theorem + `decide` and direct application of `optimalScript_correct`; no `sorry`. |
+| `Constructive/Validation11_PlausibleStress.lean` *(optional, not in aggregate)* | Randomised companion to V10 using Mathlib's `plausible` tactic on the same length-formula property. Plausible closes a passing randomised goal with `sorry` rather than synthesising a kernel proof, so V11 is **deliberately excluded** from `Constructive.lean` to keep the default build `sorry`-clean. Build directly via `lake build Project.validation.Constructive.Validation11_PlausibleStress`. |
 
 ### Optimality layer
 

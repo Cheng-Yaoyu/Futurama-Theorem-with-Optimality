@@ -20,45 +20,11 @@ formalisation:
   (paper Theorem 1 upper-bound construction, the lower-bound chain,
   the Lemma 1 family, and the Keeler-gap remarks).
 
-The file body itself contains only:
-
-* a small `Crew` example demonstrating `cyclePerm` / `repairPerm`
-  on a concrete 3-element scramble;
-* `#check` diagnostics verifying every public endpoint resolves
-  through the façade.
+The file body itself contains only `#check` diagnostics verifying
+that every public endpoint resolves through the façade. The literate
+demonstration of the algorithm on an episode-inspired S6E10 slice
+lives in [`Project.PrisonerOfBenda`](PrisonerOfBenda.lean).
 -/
-
-variable {α : Type*} [DecidableEq α]
-
-section Examples
-
-inductive Crew
-  | fry
-  | leela
-  | bender
-  | zoidberg
-  deriving DecidableEq, Repr
-
-open Crew
-
-def sampleCycle : Cycle Crew where
-  first := fry
-  second := leela
-  rest := [bender]
-  nodup := by simp
-
-#eval cyclePerm sampleCycle (Body.orig fry)
-#eval cyclePerm sampleCycle (Body.orig leela)
-#eval cyclePerm sampleCycle (Body.orig bender)
-#eval repairPerm sampleCycle Body.x
--- The theorem uses `repairPerm` on the left: `repairPerm * cyclePerm`.
-#eval (repairPerm sampleCycle * cyclePerm sampleCycle) (Body.orig fry)
-#eval (repairPerm sampleCycle * cyclePerm sampleCycle) (Body.orig leela)
-#eval (repairPerm sampleCycle * cyclePerm sampleCycle) (Body.orig bender)
-#eval (repairPerm sampleCycle * cyclePerm sampleCycle) Body.x
-#eval (repairPerm sampleCycle * cyclePerm sampleCycle) Body.y
-
-end Examples
 
 -- Diagnostics: verify key theorem types resolve through the façade
 #check @transposition_count_ge_cycle_length
