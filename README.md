@@ -58,7 +58,7 @@ lake build Project.validation.Constructive      # constructive validation
 lake build Project.validation.Optimality        # optimality validation
 
 # Optional: brute-force optimality at Fin 3 + Fin 4
-# (~38 s wall-clock via native_decide; non-gating)
+# (~35 s wall-clock via native_decide on Apple Mac mini M4 16 GB; non-gating)
 lake build Project.validation.Optimality.Validation7_BruteForceOptimality
 lake build Project.validation.Optimality.BruteForceAxioms
 ```

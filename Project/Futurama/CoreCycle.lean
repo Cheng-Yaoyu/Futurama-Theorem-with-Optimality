@@ -62,9 +62,18 @@ structure Cycle (α : Type*) where
 
 namespace Cycle
 
+/-- The full member list of a cycle: `first :: second :: rest`. Length `≥ 2`
+by `nodup`. The paper's cycle notation `(a₁ a₂ … aₖ)` corresponds to
+`c.members` after the orientation conversion documented in
+`Project/validation/paper_correspondence.md` §6 (the dictionary is
+`a₁ ↔ c.first`, `aₖ ↔ c.second`, `aᵢ ↔ c.rest[k - 1 - i]` for `2 ≤ i ≤ k - 1`).
+This file's `cyclePerm c` is the inverse of the paper's `(a₁ … aₖ)`. -/
 def members (c : Cycle α) : List α :=
   c.first :: c.second :: c.rest
 
+/-- The cycle's tail: `second :: rest`, i.e. `c.members` without the head.
+Used by `sweepScript`, `gyBlock`, and the paper-`λ` construction in
+`Optimality/UpperBound.lean`. -/
 def tail (c : Cycle α) : List α :=
   c.second :: c.rest
 
@@ -161,7 +170,17 @@ def repairScript (c : Cycle α) : List (Body α × Body α) :=
   (Body.x, Body.orig c.first) ::
     sweepScript c.tail ++ finishScript c.first c.second
 
-/-- Execute a list of body swaps from left to right. -/
+/-- Execute a list of body swaps as a composed `Perm (Body α)`.
+
+The convention is that `runScript` *executes* the list left-to-right, but
+the resulting permutation composes the swaps right-to-left:
+`runScript [s₁, s₂, s₃] = swap s₃ ∘ swap s₂ ∘ swap s₁`. This matches the
+paper's `τₜ ⋯ τ₁ · P = I` composition order, so `runScript steps * π = 1`
+in `RepairSeq.undoes` corresponds exactly to "apply the steps to undo `π`".
+
+Used as the operational semantics throughout the development; the
+cross-semantics agreement layer (`Validation5`) checks it against an
+explicit `runState` interpreter on every `Perm (Fin 4)`. -/
 def runScript : List (Body α × Body α) → Perm (Body α)
   | [] => 1
   | (u, v) :: steps => runScript steps * swap u v
