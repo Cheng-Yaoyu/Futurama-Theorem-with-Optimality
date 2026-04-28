@@ -92,22 +92,27 @@ toolchain is `leanprover/lean4:v4.23.0` (see `lean-toolchain`).
 
 ## Reading order
 
-1. [Project/README.md](Project/README.md) — code map.
-2. [Project/PrisonerOfBenda.lean](Project/PrisonerOfBenda.lean) —
+1. [docs/TripReport.md](docs/TripReport.md) — first-person narrative
+   of how the development was actually built, including the war
+   stories (the wrap-around bug, the orientation off-by-one, the
+   `Fin 5` wall) and the AI-collaboration framing. Read this if you
+   want the human side before the technical side.
+2. [Project/README.md](Project/README.md) — code map.
+3. [Project/PrisonerOfBenda.lean](Project/PrisonerOfBenda.lean) —
    one-page literate demonstration on an episode-inspired S6E10
    slice: 9 characters, 4-cycle + 3-cycle, restored by
    `optimalScript` in 11 swaps.
-3. [Project/validation/optimality_summary.md](Project/validation/optimality_summary.md)
+4. [Project/validation/optimality_summary.md](Project/validation/optimality_summary.md)
    — what the optimality side validates, in one page.
-4. [Project/validation/paper_correspondence.md](Project/validation/paper_correspondence.md)
+5. [Project/validation/paper_correspondence.md](Project/validation/paper_correspondence.md)
    — paper-to-Lean theorem-by-theorem mapping.
-5. [Project/Futurama/Optimality/UpperBound.lean](Project/Futurama/Optimality/UpperBound.lean)
+6. [Project/Futurama/Optimality/UpperBound.lean](Project/Futurama/Optimality/UpperBound.lean)
    — paper Theorem 1 construction λ + the central packaging
    (`futuramaTheorem1OfPerm` / `optimalRepairSeqOfPerm` /
    `futuramaTheorem1Full`).
-6. [Project/Futurama/Optimality/LowerBound/Layer2.lean](Project/Futurama/Optimality/LowerBound/Layer2.lean)
+7. [Project/Futurama/Optimality/LowerBound/Layer2.lean](Project/Futurama/Optimality/LowerBound/Layer2.lean)
    — the lower bound `t ≥ n + r + 2` and `futurama_optimal`.
-7. [Project/Futurama/Optimality/Lemma1.lean](Project/Futurama/Optimality/Lemma1.lean)
+8. [Project/Futurama/Optimality/Lemma1.lean](Project/Futurama/Optimality/Lemma1.lean)
    — Lemma 1(a)/(b)/(c).
 
 ## Out of scope
