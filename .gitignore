@@ -21,6 +21,12 @@ Guidelines_for_the_Report.md
 # LaTeX report source + auxiliary build outputs (the report PDF is
 # submitted separately, not via the repo).
 report.tex
+
+# Presentation slides + speaker script + Q&A prep + figures.
+# Submitted separately as PDF to the course system (same policy as
+# report.tex above). Tracked locally for the team's working copy only.
+presentation/
+
 *.aux
 *.log
 *.out

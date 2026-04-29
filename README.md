@@ -41,30 +41,132 @@ will not work twice on the same pair of bodies. The question — whether
 The complete paper-to-Lean correspondence is in
 [`Project/validation/paper_correspondence.md`](Project/validation/paper_correspondence.md).
 
+## Prerequisites
+
+* **Lean 4** via [`elan`](https://github.com/leanprover/elan) — the
+  toolchain is pinned in `lean-toolchain`
+  (`leanprover/lean4:v4.23.0`) and `elan` fetches it automatically.
+  If you don't have it yet:
+  ```bash
+  curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh
+  ```
+* **Mathlib v4.23.0** (the only declared dependency in `lakefile.toml`),
+  pulled by `lake update` from the cloud cache (~2 min one-time).
+* **OS**: macOS / Linux / Windows (WSL2 recommended for Windows).
+* **Disk**: ~2 GB for Mathlib + Lean + build artefacts.
+* **RAM**: 8 GB minimum; 16 GB recommended for the optional brute-force
+  layer (`Validation7_BruteForceOptimality`).
+
 ## Build
 
-This is a standard Lean 4 + Mathlib project. From the repo root:
+From the repo root:
 
 ```bash
-# First-time setup (downloads Mathlib)
-lake update
+# First-time setup (downloads Mathlib via cloud cache)
+lake update                # ~2 min
 
-# Build everything
-lake build
-
-# Or build specific aggregates:
-lake build Project.TestProject                  # main façade
-lake build Project.validation.Constructive      # constructive validation
-lake build Project.validation.Optimality        # optimality validation
-
-# Optional: brute-force optimality at Fin 3 + Fin 4
-# (~35 s wall-clock via native_decide on Apple Mac mini M4 16 GB; non-gating)
-lake build Project.validation.Optimality.Validation7_BruteForceOptimality
-lake build Project.validation.Optimality.BruteForceAxioms
+# Build everything (kernel + default validation)
+lake build                 # ~6 min cold, ~2 s warm
 ```
 
-The Mathlib version pinned in `lakefile.toml` is `v4.23.0`; Lean
-toolchain is `leanprover/lean4:v4.23.0` (see `lean-toolchain`).
+Targeted aggregates if you want to build a specific subsystem:
+
+```bash
+lake build Project.TestProject              # main façade — #check every public endpoint resolves
+lake build Project.validation.Constructive  # constructive (Wikipedia / Keeler) validation
+lake build Project.validation.Optimality    # paper Theorem 1 / Lemma 1 / Keeler validation
+```
+
+Optional opt-in layers (kept out of `lake build` to keep the default fast):
+
+```bash
+lake build Project.validation.Optimality.Validation7_BruteForceOptimality  # ~35 s
+lake build Project.validation.Optimality.Validation9_AntiTest              # ~2 s
+```
+
+### Build time reference
+
+Wall-clock figures measured on an **Apple Mac mini M4 (16 GB RAM)**
+with a warm Mathlib cloud cache. Per-layer rows are incremental
+rebuilds (delete the file's `.olean`, rerun `lake build`); the cold L1
+figure is `lake clean && lake build Project` on the same machine.
+
+| Target                                                                          | Time                  | Notes                              |
+|---------------------------------------------------------------------------------|-----------------------|------------------------------------|
+| `lake update` (Mathlib download)                                                | ~2 min                | first-time only                    |
+| `lake build Project` (kernel — 1244 jobs)                                       | 5 min 51 s cold; 1.6 s warm | the main soundness check     |
+| `lake build` (kernel + default validation aggregates)                           | ~6 min cold; ~2 s warm | adds V5 / V6 / V10                |
+| `lake build Project.validation.Optimality.Validation7_BruteForceOptimality`     | 35.3 s                | brute-force on Fin 3, 4 (opt-in)  |
+| `lake build Project.validation.Optimality.Validation9_AntiTest`                 | 2.2 s                 | malformed-input rejection (opt-in) |
+
+## Validation suite (per-layer breakdown)
+
+The audit runs eight independent layers of evidence. Layers 1–3 are
+structural / paper-correspondence guards; layers 4–8 are executable
+corroboration via `native_decide` / `decide` on concrete witnesses.
+
+| Layer                          | What it checks                                                          | Discharge              | Time                       |
+|--------------------------------|-------------------------------------------------------------------------|------------------------|----------------------------|
+| Kernel correctness             | zero `sorry` / `admit` / user axioms                                    | `lake build Project`   | 5 min 51 s cold; 1.6 s warm |
+| Definition correctness         | paper-λ block hierarchy pinned by 9 × `example := rfl`                  | part of L1             | —                          |
+| Statement correctness          | paper-vs-Lean row-by-row mapping                                        | `paper_correspondence.md` | manual audit             |
+| Executable validators (V6)     | `repairSeqValidator` on 4 cycle shapes                                  | 22 × `native_decide`   | 10.9 s                     |
+| Cross-semantics (V5)           | `runState` vs `runScript` on every `Perm (Fin 4)`                       | exhaustive `native_decide` | 2.5 s                  |
+| Brute-force (V7, opt-in)       | no `<n+r+2`-script undoes any non-trivial `σ` on `Fin 3, 4`             | exhaustive `native_decide` | 35.3 s; OOM at Fin 5  |
+| Anti-tests (V9, opt-in)        | validators reject 7 malformed inputs                                    | `native_decide`        | 2.2 s                      |
+| Large-cycle stress (V10)       | kernel endpoint at `k = 5, 10, 20` plus three 4-cycles on `Fin 12`     | closed-form + `decide` | 2.2 s                      |
+
+Layers 1, 2, 4, 5, 8 plus the axiom-baseline harnesses are pulled into
+`lake build` by default. The brute-force layer (V7) and anti-tests
+layer (V9) are opt-in direct targets, kept out of the default build to
+keep it fast.
+
+## What you should see after a successful build
+
+A successful `lake build` ends by listing the axiom dependency of every
+public endpoint. The output looks like:
+
+```
+info: 'futuramaTheorem1OfPerm'           depends on axioms: [propext, Classical.choice, Quot.sound]
+info: 'futurama_optimal'                 depends on axioms: [propext, Classical.choice, Quot.sound]
+info: 'optimalScriptOfPerm_isOptimal'    depends on axioms: [propext, Classical.choice, Quot.sound]
+info: 'futuramaTheorem1Full'             depends on axioms: [propext, Classical.choice, Quot.sound]
+info: 'keeler_optimal_single_cycle'      depends on axioms: [propext, Classical.choice, Quot.sound]
+info: 'keeler_achieves_and_gap'          depends on axioms: [propext, Classical.choice, Quot.sound]
+info: 'undoScript_length_single_cycle'   depends on axioms: [propext, Quot.sound]
+info: 'cutFamily_uniformLowerBound'      depends on axioms: [propext, Classical.choice, Quot.sound]
+...
+Build completed successfully (1244 jobs).
+```
+
+Every `depends on axioms:` line should list a subset of
+`{propext, Classical.choice, Quot.sound}` — the standard Lean / Mathlib
+axioms (Class I). The optional brute-force target additionally lists
+`Lean.ofReduceBool` and `Lean.trustCompiler` — these are confined to
+that file by design (see [Soundness](#soundness)).
+
+## Try it on the episode
+
+For a 30-second smoke test, open the literate demonstration:
+
+```bash
+lake env lean Project/PrisonerOfBenda.lean
+```
+
+You should see all 9 `example := decide` lines and the two
+end-of-episode theorems (`everyone_restored_optimal` and
+`everyone_restored_keeler`) elaborate in **under one second**.
+Successful exit code 0 *is* the proof going through.
+
+The slice models a simplified Planet Express crew:
+
+* a 4-cycle (Fry → Bender → Hermes → Zoidberg)
+* a 3-cycle (Leela → Amy → Professor)
+
+with `n = 7` moved bodies and `r = 2` disjoint cycles. The optimal
+repair length is `n + r + 2 = 11` swaps — computed by both Keeler's
+algorithm (`undoScript`) and the paper-optimal `λ` construction
+(`optimalScript`).
 
 ## Soundness
 
